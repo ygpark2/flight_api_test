@@ -14,12 +14,20 @@ $ npm install
 $ npm install --global bower
 ```
 
-#### 2. Install bower dependencies:
+#### 3. Install bower dependencies:
 
 __The bower command will download mainly front end files such as bootstrap, jquery and __
 
 ```sh
 $ bower install
+```
+
+#### 4. Start Dev Server:
+
+__If you didn't install gulp module globally, you are able to execute the next command to start the express server__
+
+```sh
+$ ./node_modules/gulp/bin/gulp.js
 ```
 
 
