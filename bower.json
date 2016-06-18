@@ -1,0 +1,13 @@
+{
+  "name": "flight-express",
+  "version": "0.0.1",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ],
+  "dependencies": {
+    "bootstrap-material-design": "^0.5.10",
+    "bootstrap-material-datetimepicker": "^2.7.1"
+  }
+}

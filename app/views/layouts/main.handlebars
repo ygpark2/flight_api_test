@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>{{title}}</title>
+
+    <!-- Material Design fonts -->
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/icon?family=Material+Icons">
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" type="text/css" href="/components/bootstrap/dist/css/bootstrap.min.css">
+
+  <!-- Bootstrap Material Design -->
+  <link rel="stylesheet" type="text/css" href="/components/bootstrap-material-design/dist/css/bootstrap-material-design.css">
+  <link rel="stylesheet" type="text/css" href="/components/bootstrap-material-design/dist/css/ripples.min.css">
+
+  <link rel="stylesheet" type="text/css" href="/components/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css">
+
+  <link rel="stylesheet" href="/css/style.css">
+  {{#if ENV_DEVELOPMENT}}
+    <script src="http://localhost:35729/livereload.js"></script>
+  {{/if}}
+
+  <script src="/components/jquery/dist/jquery.min.js"></script>
+  <script src="/components/momentjs/min/moment.min.js"></script>
+  <script src="/components/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="/components/bootstrap-material-design/dist/js/material.min.js"></script>
+  <script src="/components/bootstrap-material-design/dist/js/ripples.min.js"></script>
+  <script src="/components/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
+
+  <script type="text/javascript">
+
+  $( document ).ready(function() {
+    $('#travelDate').bootstrapMaterialDatePicker({ weekStart : 0, time: false });
+
+    $('#submitBtn').click(function() {
+      $('#flight_list').hide();
+      $("#spinner").show();
+      post_data = {};
+      $("#flight_search").find("input").each(function( i ) {
+        post_data[$(this).prop('id')] = $(this).val();
+      });
+      $.post( "/api/search", post_data, function( data ) {
+        $('#flightNavTabs').empty();
+        $('#flightTabContent').empty();
+        datakeys = data.map(el => Object.keys(el).pop() );
+        $.each(data, function( idx, value ) {
+          $('#flightNavTabs').append( $('<li><a href="#' + datakeys[idx] + '" data-toggle="tab">' + datakeys[idx] + '</a></li>') );
+          console.log(value);
+          var flightTabContent = $('#flightTabContent').append( $('<div class="tab-pane fade" id="' + datakeys[idx] + '"></div>') );
+          $.each(value, function( date, flightList ) {
+            if ($.isArray(flightList)) {
+              $.each(flightList, function( idxFlight, flight ) {
+                var flightInfoPanel = $('<div class="panel panel-info">' +
+                                        '  <div class="panel-heading">' +
+                                        '    <h3 class="panel-title">Panel info</h3>' +
+                                        '  </div>' +
+                                        '  <div class="panel-body">' +
+                                        '    Panel content' +
+                                        '  </div>' +
+                                        '</div>');
+                flightTabContent.find( $('#' + date) ).append(flightInfoPanel);
+                console.log( flight );
+              });
+            }
+          });
+        });
+      }, "json").done(function() {
+        $('.nav-tabs a[href="#' + $('#travelDate').val() + '"]').tab('show');
+        $('#flight_list').slideDown( "slow" );
+      })
+      .fail(function() {
+        // alert( "error" );
+      })
+      .always(function() {
+        $("#spinner").hide();
+      });
+    });
+
+  });
+
+  </script>
+
+</head>
+<body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <!-- The mobile navbar-toggle button can be safely removed since you do not need it in a non-responsive implementation -->
+          <a class="navbar-brand" href="#">{{ title }}</a>
+        </div>
+        <!-- Note that the .navbar-collapse and .collapse classes have been removed from the #navbar -->
+        <div id="navbar">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/">Home</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+    <div class="navbar navbar-info">
+              <div class="container-fluid">
+                <div class="navbar-header">
+                  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-material-light-blue-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                  </button>
+                  <a class="navbar-brand" href="javascript:void(0)">Brand</a>
+                </div>
+                <div class="navbar-collapse collapse navbar-material-light-blue-collapse">
+                  <ul class="nav navbar-nav">
+                    <li class="active"><a href="javascript:void(0)">Active<div class="ripple-container"></div></a></li>
+                    <li><a href="javascript:void(0)">Link</a></li>
+                    <li class="dropdown">
+                      <a href="index.html" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown
+                        <b class="caret"></b></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="javascript:void(0)">Action</a></li>
+                        <li><a href="javascript:void(0)">Another action</a></li>
+                        <li><a href="javascript:void(0)">Something else here</a></li>
+                        <li class="divider"></li>
+                        <li class="dropdown-header">Dropdown header</li>
+                        <li><a href="javascript:void(0)">Separated link</a></li>
+                        <li><a href="javascript:void(0)">One more separated link</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <form class="navbar-form navbar-left">
+                    <div class="form-group is-empty">
+                      <input type="text" class="form-control col-sm-8" placeholder="Search">
+                    </div>
+                  </form>
+                  <ul class="nav navbar-nav navbar-right">
+                    <li><a href="javascript:void(0)">Link</a></li>
+                    <li class="dropdown">
+                      <a href="index.html" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown
+                        <b class="caret"></b></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="javascript:void(0)">Action</a></li>
+                        <li><a href="javascript:void(0)">Another action</a></li>
+                        <li><a href="javascript:void(0)">Something else here</a></li>
+                        <li class="divider"></li>
+                        <li><a href="javascript:void(0)">Separated link</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+    <div class="container">
+
+      {{{body}}}
+
+    </div><!-- /container -->
+
+    <div id="spinner" class="loading_modal" style="display: none">
+        <div class="center">
+          <img id="img-spinner" src="/img/ajax-loader.gif" alt="Loading"/>
+        </div>
+    </div>
+
+  </body>
+</html>
