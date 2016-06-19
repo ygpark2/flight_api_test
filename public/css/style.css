@@ -5,9 +5,15 @@ body {
 a {
   color: #00B7FF;
 }
-
-.loading_modal
-{
+.nav-tabs > li.active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:focus,
+.nav-tabs > li.active > a:hover {
+  font-weight: bold;
+}
+.loading_modal {
   position: fixed;
   z-index: 1999;
   height: 100%;
@@ -19,8 +25,7 @@ a {
   opacity: 0.6;
   -moz-opacity: 0.8;
 }
-.loading_modal>.center
-{
+.loading_modal > .center {
   z-index: 2000;
   margin: 300px auto;
   padding: 10px;

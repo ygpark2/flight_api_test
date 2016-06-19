@@ -23,46 +23,92 @@
     <script src="http://localhost:35729/livereload.js"></script>
   {{/if}}
 
-  <script src="/components/jquery/dist/jquery.min.js"></script>
-  <script src="/components/momentjs/min/moment.min.js"></script>
-  <script src="/components/bootstrap/dist/js/bootstrap.min.js"></script>
-  <script src="/components/bootstrap-material-design/dist/js/material.min.js"></script>
-  <script src="/components/bootstrap-material-design/dist/js/ripples.min.js"></script>
-  <script src="/components/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
+  <script type="text/javascript" src="/components/jquery/dist/jquery.min.js"></script>
+  <script type="text/javascript" src="/components/momentjs/min/moment.min.js"></script>
+  <script type="text/javascript" src="/components/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/components/bootstrap-material-design/dist/js/material.min.js"></script>
+  <script type="text/javascript" src="/components/bootstrap-material-design/dist/js/ripples.min.js"></script>
+  <script type="text/javascript" src="/components/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
+
+  <script type="text/javascript" src="/components/Bootstrap-3-Typeahead/bootstrap3-typeahead.min.js"></script>
+  <script type="text/javascript" src="/components/handlebars/handlebars.min.js"></script>
 
   <script type="text/javascript">
 
   $( document ).ready(function() {
+
+    var post_data = {fromLocation: "", toLocation: "", travelDate: ""};
+    $.each(["fromLocation", "toLocation"], function(index, value) {
+      $('#' + value).typeahead({
+        minLength: 2,
+        matcher: function (item) {
+          var it = this.displayText(item);
+          return ~it.toLowerCase().indexOf(this.query.toLowerCase());
+        },
+        displayText: function (item) {
+          if (typeof item !== 'undefined') {
+            if (typeof item.cityName != 'undefined' && typeof item.airportName != 'undefined') {
+              return item.cityName + " [ " + item.airportName + " ] ";
+            } else {
+              return item;
+            }
+          } else {
+            return item;
+          }
+        },
+        updater: function (item) {
+          post_data[value] = item.airportCode;
+          return item;
+        },
+        source:  function (query, process) {
+          return $.get('/api/airports', { q: query }, function (data) {
+              console.log(data);
+              // data = $.parseJSON(data);
+              return process(data);
+          });
+        }
+      });
+    });
+
     $('#travelDate').bootstrapMaterialDatePicker({ weekStart : 0, time: false });
+    $('#travelDate').on("change", function (event, date) {
+      post_data.travelDate = date.format('YYYY-MM-DD');
+    });
+
+    var tmpl = $.get('/templates/flight.hbs', function (data) {
+        var template=Handlebars.compile(data);
+        // $(target).html(template(jsonData));
+        return template;
+    }, 'html')
+    console.log(tmpl)
 
     $('#submitBtn').click(function() {
       $('#flight_list').hide();
       $("#spinner").show();
-      post_data = {};
-      $("#flight_search").find("input").each(function( i ) {
-        post_data[$(this).prop('id')] = $(this).val();
-      });
+      // $("#flight_search").find("input").each(function( i ) {
+      //   post_data[$(this).prop('id')] = $(this).val();
+      // });
+      console.log(post_data);
+
+      var tplsrc = $("#flight-template").html();
+      var template = Handlebars.compile(tplsrc);
+
       $.post( "/api/search", post_data, function( data ) {
         $('#flightNavTabs').empty();
         $('#flightTabContent').empty();
         datakeys = data.map(el => Object.keys(el).pop() );
         $.each(data, function( idx, value ) {
           $('#flightNavTabs').append( $('<li><a href="#' + datakeys[idx] + '" data-toggle="tab">' + datakeys[idx] + '</a></li>') );
-          console.log(value);
           var flightTabContent = $('#flightTabContent').append( $('<div class="tab-pane fade" id="' + datakeys[idx] + '"></div>') );
           $.each(value, function( date, flightList ) {
             if ($.isArray(flightList)) {
               $.each(flightList, function( idxFlight, flight ) {
-                var flightInfoPanel = $('<div class="panel panel-info">' +
-                                        '  <div class="panel-heading">' +
-                                        '    <h3 class="panel-title">Panel info</h3>' +
-                                        '  </div>' +
-                                        '  <div class="panel-body">' +
-                                        '    Panel content' +
-                                        '  </div>' +
-                                        '</div>');
-                flightTabContent.find( $('#' + date) ).append(flightInfoPanel);
-                console.log( flight );
+                if ($.type(flight) === "object" && !$.isEmptyObject(flight)) {
+                  console.log(flight);
+                  flightTabContent.find( $('#' + date) ).append( template(flight) );
+                } else {
+                  console.log("there is an error in API call!");
+                }
               });
             }
           });
@@ -81,6 +127,41 @@
 
   });
 
+  </script>
+
+  <script id="flight-template" type="text/x-handlebars-template">
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <div class="row">
+          <div class="col-md-10">
+            <h3 class="panel-title">
+              \{{airline.name}}
+              \{{flightNum}}
+              \{{durationMin}}
+              \{{distance}}
+            </h3>
+          </div>
+          <div class="col-md-2">
+            <b> \{{price}} $ </b>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-md-6">
+            Start <br/>
+            City : \{{start.cityName}} <br/>
+            Airport : \{{start.airportName}} <br/>
+            Date : \{{start.dateTime}} <br/>
+          </div>
+          <div class="col-md-6">
+            Finish <br/>
+            City : \{{finish.cityName}} <br/>
+            Airport : \{{finish.airportName}} <br/>
+            Date : \{{finish.dateTime}} <br/>
+          </div>
+      </div>
+    </div>
   </script>
 
 </head>
@@ -102,57 +183,6 @@
       </div>
     </nav>
 
-
-    <div class="navbar navbar-info">
-              <div class="container-fluid">
-                <div class="navbar-header">
-                  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-material-light-blue-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                  </button>
-                  <a class="navbar-brand" href="javascript:void(0)">Brand</a>
-                </div>
-                <div class="navbar-collapse collapse navbar-material-light-blue-collapse">
-                  <ul class="nav navbar-nav">
-                    <li class="active"><a href="javascript:void(0)">Active<div class="ripple-container"></div></a></li>
-                    <li><a href="javascript:void(0)">Link</a></li>
-                    <li class="dropdown">
-                      <a href="index.html" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown
-                        <b class="caret"></b></a>
-                      <ul class="dropdown-menu">
-                        <li><a href="javascript:void(0)">Action</a></li>
-                        <li><a href="javascript:void(0)">Another action</a></li>
-                        <li><a href="javascript:void(0)">Something else here</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header">Dropdown header</li>
-                        <li><a href="javascript:void(0)">Separated link</a></li>
-                        <li><a href="javascript:void(0)">One more separated link</a></li>
-                      </ul>
-                    </li>
-                  </ul>
-                  <form class="navbar-form navbar-left">
-                    <div class="form-group is-empty">
-                      <input type="text" class="form-control col-sm-8" placeholder="Search">
-                    </div>
-                  </form>
-                  <ul class="nav navbar-nav navbar-right">
-                    <li><a href="javascript:void(0)">Link</a></li>
-                    <li class="dropdown">
-                      <a href="index.html" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown
-                        <b class="caret"></b></a>
-                      <ul class="dropdown-menu">
-                        <li><a href="javascript:void(0)">Action</a></li>
-                        <li><a href="javascript:void(0)">Another action</a></li>
-                        <li><a href="javascript:void(0)">Something else here</a></li>
-                        <li class="divider"></li>
-                        <li><a href="javascript:void(0)">Separated link</a></li>
-                      </ul>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
     <div class="container">
 
       {{{body}}}

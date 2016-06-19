@@ -8,6 +8,8 @@
   ],
   "dependencies": {
     "bootstrap-material-design": "^0.5.10",
-    "bootstrap-material-datetimepicker": "^2.7.1"
+    "bootstrap-material-datetimepicker": "^2.7.1",
+    "handlebars": "^4.0.5",
+    "Bootstrap-3-Typeahead": "git://github.com/bassjobsen/Bootstrap-3-Typeahead.git#master"
   }
 }
