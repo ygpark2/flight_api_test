@@ -104,6 +104,10 @@
             if ($.isArray(flightList)) {
               $.each(flightList, function( idxFlight, flight ) {
                 if ($.type(flight) === "object" && !$.isEmptyObject(flight)) {
+                  var d = moment.duration(flight.durationMin, 'minutes');
+                  var hours = Math.floor(d.asHours());
+                  var mins = Math.floor(d.asMinutes()) - hours * 60;
+                  flight["durationTime"] = hours + " hours " + mins + " minutes";
                   console.log(flight);
                   flightTabContent.find( $('#' + date) ).append( template(flight) );
                 } else {
@@ -135,10 +139,9 @@
         <div class="row">
           <div class="col-md-10">
             <h3 class="panel-title">
-              \{{airline.name}}
-              \{{flightNum}}
-              \{{durationMin}}
-              \{{distance}}
+              <b> \{{airline.name}}
+              [ Flight Number : \{{flightNum}},
+                Duration : \{{durationTime}} ] </b>
             </h3>
           </div>
           <div class="col-md-2">
@@ -149,13 +152,13 @@
       <div class="panel-body">
         <div class="row">
           <div class="col-md-6">
-            Start <br/>
+            <b>Start</b> <br/>
             City : \{{start.cityName}} <br/>
             Airport : \{{start.airportName}} <br/>
             Date : \{{start.dateTime}} <br/>
           </div>
           <div class="col-md-6">
-            Finish <br/>
+            <b>Finish</b> <br/>
             City : \{{finish.cityName}} <br/>
             Airport : \{{finish.airportName}} <br/>
             Date : \{{finish.dateTime}} <br/>
