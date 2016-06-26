@@ -29,8 +29,12 @@ __If you didn't install gulp module globally, you are able to execute the next c
 ```sh
 $ ./node_modules/gulp/bin/gulp.js
 ```
-
+or execute the next command on the assumption that you installed gulp globally.
 
 ```sh
-$ npm install --save-dev gulp
+$ gulp
 ```
+Now, you should be able to see the main page on the url http://localhost:3000
+
+__If you can properly see the main page, you are ready to test the API which is incorporated in the main page.__
+
